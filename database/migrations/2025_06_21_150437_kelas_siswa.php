@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('t_kelas_siswa', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            // $table->uuid('id')->primary();
             $table->uuid('kelas_id');
             $table->uuid('siswa_id');
             $table->timestamps();
@@ -20,7 +20,7 @@ return new class extends Migration
             $table->foreign('kelas_id')->references('id')->on('kelas')->onDelete('cascade');
             $table->foreign('siswa_id')->references('id')->on('siswa')->onDelete('cascade');
 
-            $table->unique(['kelas_id', 'siswa_id']);
+            $table->primary(['kelas_id', 'siswa_id']);
         });
     }
 

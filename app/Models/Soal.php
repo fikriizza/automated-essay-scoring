@@ -28,4 +28,8 @@ class Soal extends Model
     {
         return $this->hasMany(Jawaban::class);
     }
+    public function paketSoal()
+    {
+        return $this->belongsTo(PaketSoal::class);
+    }
 }

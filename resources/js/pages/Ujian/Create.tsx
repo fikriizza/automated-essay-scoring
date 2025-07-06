@@ -11,6 +11,7 @@ import { AlertCircle, ArrowLeft, BookOpen, FileText } from 'lucide-react';
 interface Kelas {
     id: string;
     nama_kelas: string;
+    tahun_ajaran: string;
 }
 
 interface MataPelajaran {
@@ -109,7 +110,7 @@ export default function Create({ kelas, mataPelajarans }: PageProps) {
                                         <SelectContent>
                                             {kelas.map((kls) => (
                                                 <SelectItem key={kls.id} value={kls.id}>
-                                                    {kls.nama_kelas}
+                                                    {kls.nama_kelas} ({kls.tahun_ajaran})
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>

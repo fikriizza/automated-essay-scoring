@@ -21,6 +21,10 @@ class DatabaseSeeder extends Seeder
         // ]);
         $this->call([
             KelasSeeder::class,
+            UserSiswaSeeder::class,
+            AssignSiswaToKelasSeeder::class,
+            MataPelajaranDanUjianSeeder::class,
+            SoalSeeder::class
         ]);
     }
 }

@@ -7,7 +7,10 @@ import { FormEvent } from 'react';
 
 interface Siswa {
     id: number;
-    nama: string;
+    // nama: string;
+    user: {
+        name: string;
+    } | null;
     nisn: string;
 }
 
@@ -25,7 +28,10 @@ interface Props extends PageProps {
 
 interface SiswaOption {
     id: number;
-    nama: string;
+    // nama: string;
+    user: {
+        name: string;
+    };
 }
 
 export default function KelasDetail() {
@@ -79,7 +85,8 @@ export default function KelasDetail() {
                         <option value="">-- Select Siswa --</option>
                         {allSiswas.filter(Boolean).map((siswa) => (
                             <option key={siswa.id} value={siswa.id.toString()}>
-                                {siswa.nama}
+                                {/* {siswa.nama} */}
+                                {siswa.user?.name ?? '-'}
                             </option>
                         ))}
                     </select>
@@ -116,7 +123,8 @@ export default function KelasDetail() {
                                 siswas.map((siswa, i) => (
                                     <TableRow key={siswa.id}>
                                         <TableCell>{i + 1}</TableCell>
-                                        <TableCell>{siswa.nama}</TableCell>
+                                        {/* <TableCell>{siswa.nama}</TableCell> */}
+                                        <TableCell>{siswa.user?.name ?? '-'}</TableCell>
                                         <TableCell>{siswa.nisn}</TableCell>
                                     </TableRow>
                                 ))

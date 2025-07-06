@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Web\JawabanController;
 use App\Http\Controllers\Web\KelasController;
 use App\Http\Controllers\Web\MapelController;
 use App\Http\Controllers\Web\SiswaController;
@@ -60,6 +61,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'nama' => auth()->user()->name,
         ]);
     })->name('dashboard.siswa');
+    // Route::middleware(['auth'])->group(function () {
+    //     Route::get('/ujian/{ujian}/kerjakan', [JawabanController::class, 'kerjakan'])->name('ujian.kerjakan');
+    //     Route::post('/soal/{soal}/jawab', [JawabanController::class, 'simpanJawaban'])->name('soal.jawab');
+    // });
+    // routes/web.php
+    // Route::get('/ujian/{id}/kerjakan', [JawabanController::class, 'kerjakan'])->name('ujian.kerjakan');
+    Route::get('/soal-ujian', [JawabanController::class, 'daftarUjian'])->name('soal.index');
+    Route::get('/ujian/{id}/kerjakan', [JawabanController::class, 'kerjakan'])->name('ujian.kerjakan');
+    Route::post('/soal/{soal}/jawab', [JawabanController::class, 'simpanJawaban'])->name('soal.jawab');
 });
 
 require __DIR__ . '/settings.php';

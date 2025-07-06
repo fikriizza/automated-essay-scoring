@@ -13,33 +13,94 @@ use Inertia\Inertia;
 
 class UjianController extends Controller
 {
+    // public function index(Request $request)
+    // {
+    //     $search = $request->get('search');
+    //     $perPage = $request->get('per_page', 10);
+
+    //     $ujians = Ujian::with(['kelas', 'mataPelajaran'])
+    //         ->when($search, function ($query, $search) {
+    //             $query->where('nama_ujian', 'like', "%{$search}%")
+    //                 ->orWhereHas('kelas', fn($q) => $q->where('nama_kelas', 'like', "%{$search}%"))
+    //                 ->orWhereHas('mataPelajaran', fn($q) => $q->where('nama_mapel', 'like', "%{$search}%"));
+    //         })
+    //         ->paginate($perPage);
+
+    // return Inertia::render('Ujian/Index', [
+    //     'ujians' => $ujians,
+    //     'filters' => [
+    //         'search' => $search,
+    //         'per_page' => $perPage,
+    //     ],
+    // ]);
+    //     return Inertia::render('Ujian/Index', [
+    //         'ujians' => $ujians->through(function ($ujian) {
+    //             return [
+    //                 'id' => $ujian->id,
+    //                 'nama_ujian' => $ujian->nama_ujian,
+    //                 'mata_pelajaran' => $ujian->mataPelajaran->nama_mapel ?? '-',
+    //                 'kelas' => [
+    //                     'nama_kelas' => $ujian->kelas->nama_kelas ?? '-',
+    //                     'tahun_ajaran' => $ujian->kelas->tahun_ajaran ?? '-',
+    //                 ],
+    //             ];
+    //         }),
+    //         'filters' => [
+    //             'search' => $search,
+    //             'per_page' => $perPage,
+    //         ],
+    //         'pagination' => [
+    //             'total' => $ujians->total(),
+    //             'current_page' => $ujians->currentPage(),
+    //             'last_page' => $ujians->lastPage(),
+    //         ],
+    //     ]);
+    // }
     public function index(Request $request)
     {
-        $search = $request->get('search');
-        $perPage = $request->get('per_page', 10);
+        $perPage = (int) $request->input('per_page', 10);
+        $search = $request->input('search');
+        $sortBy = $request->input('sort_by', 'nama_ujian');
+        $sortDirection = $request->input('sort_direction', 'asc');
 
-        $ujians = Ujian::with(['kelas', 'mataPelajaran'])
-            ->when($search, function ($query, $search) {
-                $query->where('nama_ujian', 'like', "%{$search}%")
-                    ->orWhereHas('kelas', fn($q) => $q->where('nama_kelas', 'like', "%{$search}%"))
-                    ->orWhereHas('mataPelajaran', fn($q) => $q->where('nama_mapel', 'like', "%{$search}%"));
-            })
-            ->paginate($perPage);
+        // $query = Ujian::with(['kelas', 'mataPelajaran']);
+        $query = Ujian::with(['kelas', 'mataPelajaran'])->withCount('soals');
+
+
+        if ($search) {
+            $query->where('nama_ujian', 'like', "%{$search}%")
+                ->orWhereHas('kelas', fn($q) => $q->where('nama_kelas', 'like', "%{$search}%"))
+                ->orWhereHas('mataPelajaran', fn($q) => $q->where('nama_mapel', 'like', "%{$search}%"));
+        }
+
+        if (in_array($sortBy, ['nama_ujian']) && in_array($sortDirection, ['asc', 'desc'])) {
+            $query->orderBy($sortBy, $sortDirection);
+        } else {
+            $query->latest();
+        }
+
+        $ujians = $query->paginate($perPage)->withQueryString();
 
         return Inertia::render('Ujian/Index', [
             'ujians' => $ujians,
             'filters' => [
                 'search' => $search,
                 'per_page' => $perPage,
+                'sort_by' => $sortBy,
+                'sort_direction' => $sortDirection,
             ],
         ]);
     }
 
 
+
     public function create()
     {
         return Inertia::render('Ujian/Create', [
-            'kelas' => Kelas::all(),
+            // 'kelas' => Kelas::all(),
+            'kelas' => Kelas::select('id', 'nama_kelas', 'tahun_ajaran')
+                ->orderByDesc('tahun_ajaran')
+                ->get(),
             'mataPelajarans' => MataPelajaran::all(),
         ]);
     }
@@ -71,10 +132,12 @@ class UjianController extends Controller
     public function edit($id)
     {
         $ujian = Ujian::with(['kelas', 'mataPelajaran', 'soals'])->findOrFail($id);
-
+        Kelas::orderByDesc('tahun_ajaran')->get();
         return Inertia::render('Ujian/Edit', [
             'ujian' => $ujian,
-            'kelas' => Kelas::all(),
+            'kelas' => Kelas::select('id', 'nama_kelas', 'tahun_ajaran')
+                ->orderByDesc('tahun_ajaran')
+                ->get(),
             'mataPelajarans' => MataPelajaran::all(),
         ]);
     }

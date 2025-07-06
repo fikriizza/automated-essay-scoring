@@ -97,7 +97,10 @@ class SiswaController extends Controller
         return Inertia::render('Siswa/Edit', [
             'siswa' => [
                 'id' => $siswa->id,
-                'nama' => $siswa->user->name,
+                'user' => [
+                    'name' => $siswa->user->name,
+                    'email' => $siswa->user->email,
+                ],
                 'email' => $siswa->user->email,
                 'nisn' => $siswa->nisn,
             ],

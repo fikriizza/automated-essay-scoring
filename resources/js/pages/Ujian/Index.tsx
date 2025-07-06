@@ -18,6 +18,7 @@ interface UjianItem {
     kelas: {
         id: string;
         nama_kelas: string;
+        tahun_ajaran: string;
     };
     mata_pelajaran: {
         id: string;
@@ -210,7 +211,9 @@ export default function Index() {
                                           <TableRow key={ujian.id}>
                                               <TableCell>{(ujians.current_page - 1) * ujians.per_page + i + 1}</TableCell>
                                               <TableCell className="font-medium">{ujian.nama_ujian}</TableCell>
-                                              <TableCell>{ujian.kelas.nama_kelas}</TableCell>
+                                              {/* <TableCell>{ujian.kelas.nama_kelas}</TableCell> */}
+                                              <TableCell>{ujian.kelas ? `${ujian.kelas.nama_kelas} - ${ujian.kelas.tahun_ajaran}` : '-'}</TableCell>
+
                                               <TableCell>{ujian.mata_pelajaran.nama_mapel}</TableCell>
                                               <TableCell className="text-center">
                                                   <Badge variant="secondary">{ujian.soals_count || 0} soal</Badge>

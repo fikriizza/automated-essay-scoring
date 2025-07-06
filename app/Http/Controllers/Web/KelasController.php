@@ -37,8 +37,8 @@ class KelasController extends Controller
         // ]);
         $perPage = (int) $request->input('per_page', 10);
         $search = $request->input('search');
-        $sortBy = $request->input('sort_by', 'nama_kelas'); // default: nama_kelas
-        $sortDirection = $request->input('sort_direction', 'asc'); // default: asc
+        $sortBy = $request->input('sort_by', 'nama_kelas');
+        $sortDirection = $request->input('sort_direction', 'asc');
 
         $query = Kelas::query();
 
@@ -49,7 +49,7 @@ class KelasController extends Controller
         if (in_array($sortBy, ['nama_kelas', 'tahun_ajaran']) && in_array($sortDirection, ['asc', 'desc'])) {
             $query->orderBy($sortBy, $sortDirection);
         } else {
-            $query->latest(); // fallback default
+            $query->latest();
         }
 
         $kelas = $query->paginate($perPage)->withQueryString();
@@ -115,12 +115,13 @@ class KelasController extends Controller
 
     public function show(Kelas $kelas)
     {
-        $siswa = $kelas->siswa()->with('kelas')->get();
+        $siswa = $kelas->siswa()->with('kelas', 'user')->get();
         $kelas->load('siswa');
 
         $currentAcademicYear = $kelas->tahun_ajaran;
 
-        $allSiswas = Siswa::select('id', 'nama')
+        // $allSiswas = Siswa::select('id', 'nama')
+        $allSiswas = Siswa::with('user')
             ->whereNotIn('id', function ($query) use ($currentAcademicYear) {
                 $query->select('siswa_id')
                     ->from('t_kelas_siswa')

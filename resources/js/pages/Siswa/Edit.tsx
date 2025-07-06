@@ -16,7 +16,11 @@ const breadcrumbs: BreadcrumbItem[] = [
 interface EditProps {
     siswa: {
         id: number;
-        nama: string;
+        // nama: string;
+        user: {
+            name: string;
+            email: string;
+        };
         nisn: string | null;
         email: string | null;
     };
@@ -24,9 +28,9 @@ interface EditProps {
 
 export default function Edit({ siswa }: EditProps) {
     const { data, setData, post, processing, errors } = useForm({
-        nama: siswa.nama || '',
         nisn: siswa.nisn || '',
-        email: siswa.email || '',
+        nama: siswa.user?.name ?? '',
+        email: siswa.user?.email ?? '',
         password: '',
     });
 

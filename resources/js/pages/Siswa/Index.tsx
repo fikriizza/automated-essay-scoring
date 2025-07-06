@@ -21,7 +21,10 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 interface Siswa {
     id: string;
-    nama: string;
+    // nama: string;
+    user: {
+        name: string;
+    };
     nisn?: string;
 }
 
@@ -238,7 +241,7 @@ export default function Index() {
                                               <>
                                                   <TableRow key={siswa.id}>
                                                       <TableCell>{rowNumber++}</TableCell>
-                                                      <TableCell className="font-medium">{siswa.nama}</TableCell>
+                                                      <TableCell className="font-medium">{siswa.user?.name ?? '-'}</TableCell>
                                                       <TableCell>{siswa.nisn || '-'}</TableCell>
                                                       <TableCell className="text-center">
                                                           <div className="flex justify-center gap-2">
@@ -249,7 +252,7 @@ export default function Index() {
                                                               </Link>
                                                               <AlertDialogDelete
                                                                   title="Are you sure?"
-                                                                  description={`This will permanently delete the siswa "${siswa.nama}".`}
+                                                                  description={`This will permanently delete the siswa "${siswa.user?.name ?? '-'}".`}
                                                                   onConfirm={handleDelete}
                                                                   loading={processing}
                                                               >
