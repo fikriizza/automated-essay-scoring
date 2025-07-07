@@ -192,7 +192,8 @@ export function AppSidebar() {
     const { props } = usePage();
     const user = props.auth?.user;
 
-    const isStudent = user?.siswa !== null && user?.siswa !== undefined;
+    // const isStudent = user?.siswa !== null && user?.siswa !== undefined;
+    const isStudent = !!user?.siswa;
 
     // Menu khusus admin/operator
     const adminNavItems: NavItem[] = [

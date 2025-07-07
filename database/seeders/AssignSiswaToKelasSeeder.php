@@ -16,32 +16,39 @@ class AssignSiswaToKelasSeeder extends Seeder
     {
         $siswaList = Siswa::orderBy('created_at')->get();
 
-        // Ambil data kelas berdasarkan tahun ajaran dan urutan kelas
+        // Ambil data kelas berdasarkan tahun ajaran
         $kelasByTahun = Kelas::all()->groupBy('tahun_ajaran');
 
         // === TAHUN AJARAN 2024/2025 ===
-        // 5 siswa pertama: kelas 1 (2024)
-        $index = 0;
-        for ($i = 1; $i <= 6; $i++) {
-            $kelas = $kelasByTahun['2024/2025']->firstWhere('nama_kelas', "Kelas $i");
-            for ($j = 0; $j < 5; $j++) {
-                $siswa = $siswaList[$index++] ?? null;
-                if ($siswa && $kelas) {
-                    $kelas->siswa()->attach($siswa->id);
-                }
+        // Siswa urutan 6–10 masuk ke kelas 1 tahun 2024/2025
+        $index = 5; // karena urutan 6 berarti index ke-5
+        $kelas2024 = $kelasByTahun['2024/2025']->firstWhere('nama_kelas', 'Kelas 1');
+        for ($i = 0; $i < 5; $i++) {
+            $siswa = $siswaList[$index++] ?? null;
+            if ($siswa && $kelas2024) {
+                $kelas2024->siswa()->attach($siswa->id);
             }
         }
 
         // === TAHUN AJARAN 2025/2026 ===
-        // Siswa dari kelas 1–5 tahun 2024/2025 dipindahkan ke kelas 2–6 tahun 2025/2026
+
+        // 1. Isi kelas 1 tahun 2025/2026 dengan siswa urutan 1–5
+        $kelas2025_1 = $kelasByTahun['2025/2026']->firstWhere('nama_kelas', 'Kelas 1');
+        for ($i = 0; $i < 5; $i++) {
+            $siswa = $siswaList[$i] ?? null;
+            if ($siswa && $kelas2025_1) {
+                $kelas2025_1->siswa()->attach($siswa->id);
+            }
+        }
+
+        // 2. Pindahkan siswa dari kelas 1–5 tahun 2024/2025 ke kelas 2–6 tahun 2025/2026
         for ($i = 1; $i <= 5; $i++) {
             $kelasLama = $kelasByTahun['2024/2025']->firstWhere('nama_kelas', "Kelas $i");
             $kelasBaru = $kelasByTahun['2025/2026']->firstWhere('nama_kelas', "Kelas " . ($i + 1));
 
-            $siswaKelasLama = $kelasLama->siswa()->get();
-
-            foreach ($siswaKelasLama as $siswa) {
-                if ($kelasBaru) {
+            if ($kelasLama && $kelasBaru) {
+                $siswaKelasLama = $kelasLama->siswa;
+                foreach ($siswaKelasLama as $siswa) {
                     $kelasBaru->siswa()->attach($siswa->id);
                 }
             }

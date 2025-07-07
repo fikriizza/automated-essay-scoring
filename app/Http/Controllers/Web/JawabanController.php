@@ -12,44 +12,32 @@ use Inertia\Inertia;
 
 class JawabanController extends Controller
 {
-    // Tampilkan soal ujian untuk dijawab
     public function kerjakan($ujianId)
     {
         $user = Auth::user();
         $siswa = $user->siswa;
 
-        // $ujian = Ujian::with(['soals', 'kelas'])->findOrFail($ujianId);
         $ujian = Ujian::with([
             'kelas',
             'mataPelajaran',
-            // 'soals.paketSoal.mataPelajaran'
             'soals'
         ])->findOrFail($ujianId);
-        // dd($ujian->toArray());
 
-        // Cek apakah siswa tergabung dalam kelas ujian
         if (!$siswa->kelas->contains('id', $ujian->kelas_id)) {
             abort(403, 'Anda tidak terdaftar di kelas ini.');
         }
 
-        // Ambil jawaban sebelumnya jika ada
         $jawabanSebelumnya = Jawaban::where('siswa_id', $siswa->id)
             ->whereIn('soal_id', $ujian->soals->pluck('id'))
             ->get()
             ->keyBy('soal_id');
 
-        // return inertia('Ujian/Kerjakan', [
-        //     'ujian' => $ujian,
-        //     'soals' => $ujian->soals,
-        //     'jawabanSebelumnya' => $jawabanSebelumnya,
-        // ]);
         return Inertia::render('SoalUjian/KerjakanSoal', [
             'ujian' => $ujian,
             'jawabanSebelumnya' => $jawabanSebelumnya,
         ]);
     }
 
-    // Simpan jawaban siswa untuk 1 soal
     public function simpanJawaban(Request $request, $soalId)
     {
         $request->validate([
@@ -58,27 +46,58 @@ class JawabanController extends Controller
 
         $user = Auth::user();
         $siswa = $user->siswa;
-        $soal = Soal::findOrFail($soalId);
 
-        // Cek apakah soal ini termasuk ujian kelas siswa
+        $soal = Soal::findOrFail($soalId);
         $ujian = $soal->ujian;
+
         if (!$siswa->kelas->contains('id', $ujian->kelas_id)) {
-            abort(403, 'Anda tidak terdaftar di kelas ini.');
+            abort(403, 'Anda tidak terdaftar di kelas ujian ini.');
         }
 
         Jawaban::updateOrCreate(
             ['siswa_id' => $siswa->id, 'soal_id' => $soal->id],
-            ['jawaban' => $request->jawaban]
+            ['id' => \Illuminate\Support\Str::uuid(), 'jawaban' => $request->jawaban]
         );
 
         return back()->with('success', 'Jawaban berhasil disimpan.');
     }
+
+    public function simpanSemuaJawaban(Request $request, $ujianId)
+    {
+        $validated = $request->validate([
+            'jawaban' => 'required|array',
+            'jawaban.*.soal_id' => 'required|uuid|exists:soal,id',
+            'jawaban.*.jawaban' => 'required|string',
+        ]);
+
+        $user = Auth::user();
+        $siswa = $user->siswa;
+
+        if (!$siswa) {
+            abort(403, 'User belum punya relasi siswa');
+        }
+
+        $ujian = Ujian::findOrFail($ujianId);
+
+        if (!$siswa->kelas->contains('id', $ujian->kelas_id)) {
+            abort(403, 'Anda tidak terdaftar di kelas ujian ini.');
+        }
+
+        foreach ($validated['jawaban'] as $item) {
+            Jawaban::updateOrCreate(
+                ['siswa_id' => $siswa->id, 'soal_id' => $item['soal_id']],
+                ['id' => \Illuminate\Support\Str::uuid(), 'jawaban' => $item['jawaban']]
+            );
+        }
+
+        return redirect()->route('soal.index')->with('success', 'Semua jawaban berhasil disimpan.');
+    }
+
     public function daftarUjian()
     {
         $user = Auth::user();
         $siswa = $user->siswa;
 
-        // Ambil kelas siswa dengan tahun ajaran terbaru
         $kelasTerbaru = $siswa->kelas()
             ->orderByDesc('tahun_ajaran')
             ->first();
@@ -89,7 +108,6 @@ class JawabanController extends Controller
             ]);
         }
 
-        // Ambil ujian berdasarkan kelas tersebut
         $ujians = Ujian::with('kelas', 'mataPelajaran')
             ->where('kelas_id', $kelasTerbaru->id)
             ->get();

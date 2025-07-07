@@ -69,7 +69,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Route::get('/ujian/{id}/kerjakan', [JawabanController::class, 'kerjakan'])->name('ujian.kerjakan');
     Route::get('/soal-ujian', [JawabanController::class, 'daftarUjian'])->name('soal.index');
     Route::get('/ujian/{id}/kerjakan', [JawabanController::class, 'kerjakan'])->name('ujian.kerjakan');
-    Route::post('/soal/{soal}/jawab', [JawabanController::class, 'simpanJawaban'])->name('soal.jawab');
+    // Route::post('/soal/{soal}/jawab', [JawabanController::class, 'simpanJawaban'])->name('soal.jawab');
+    Route::post('/ujian/{ujian}/jawab-semua', [JawabanController::class, 'simpanSemuaJawaban'])->name('soal.jawab.semua');
 });
 
 require __DIR__ . '/settings.php';

@@ -39,13 +39,13 @@ class SoalSeeder extends Seeder
         // Contoh soal berdasarkan kombinasi
         if ($mapel === 'IPA') {
             return [
-                "Apa perbedaan antara makhluk hidup dan benda mati? Jelaskan ciri-ciri masing-masing! ($kelas - $tahun - $jenis)",
-                "Sebutkan dan jelaskan fungsi bagian-bagian utama dari tumbuhan! ($kelas - $tahun - $jenis)",
+                "Apa perbedaan antara makhluk hidup dan benda mati? Jelaskan ciri-ciri masing-masing!",
+                "Sebutkan dan jelaskan fungsi bagian-bagian utama dari tumbuhan!",
             ];
         } elseif ($mapel === 'IPS') {
             return [
-                "Jelaskan apa yang dimaksud dengan lingkungan alam dan lingkungan buatan! Berikan contohnya! ($kelas - $tahun - $jenis)",
-                "Mengapa kita harus menjaga kebersihan lingkungan sekolah? Berikan alasannya! ($kelas - $tahun - $jenis)",
+                "Jelaskan apa yang dimaksud dengan lingkungan alam dan lingkungan buatan! Berikan contohnya!",
+                "Mengapa kita harus menjaga kebersihan lingkungan sekolah? Berikan alasannya!",
             ];
         }
 
