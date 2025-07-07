@@ -38,30 +38,6 @@ class JawabanController extends Controller
         ]);
     }
 
-    public function simpanJawaban(Request $request, $soalId)
-    {
-        $request->validate([
-            'jawaban' => 'required|string',
-        ]);
-
-        $user = Auth::user();
-        $siswa = $user->siswa;
-
-        $soal = Soal::findOrFail($soalId);
-        $ujian = $soal->ujian;
-
-        if (!$siswa->kelas->contains('id', $ujian->kelas_id)) {
-            abort(403, 'Anda tidak terdaftar di kelas ujian ini.');
-        }
-
-        Jawaban::updateOrCreate(
-            ['siswa_id' => $siswa->id, 'soal_id' => $soal->id],
-            ['id' => \Illuminate\Support\Str::uuid(), 'jawaban' => $request->jawaban]
-        );
-
-        return back()->with('success', 'Jawaban berhasil disimpan.');
-    }
-
     public function simpanSemuaJawaban(Request $request, $ujianId)
     {
         $validated = $request->validate([

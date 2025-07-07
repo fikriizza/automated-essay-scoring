@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Web\JawabanController;
 use App\Http\Controllers\Web\KelasController;
+use App\Http\Controllers\Web\ManageJawabanController;
 use App\Http\Controllers\Web\MapelController;
 use App\Http\Controllers\Web\SiswaController;
 use App\Http\Controllers\Web\UjianController;
@@ -71,6 +72,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/ujian/{id}/kerjakan', [JawabanController::class, 'kerjakan'])->name('ujian.kerjakan');
     // Route::post('/soal/{soal}/jawab', [JawabanController::class, 'simpanJawaban'])->name('soal.jawab');
     Route::post('/ujian/{ujian}/jawab-semua', [JawabanController::class, 'simpanSemuaJawaban'])->name('soal.jawab.semua');
+    Route::prefix('manage-jawaban')->group(function () {
+        Route::get('/', [ManageJawabanController::class, 'index'])->name('manage.jawaban.index');
+        Route::get('/ujian/{ujian}', [ManageJawabanController::class, 'show'])->name('manage.jawaban.show');
+        Route::get('/ujian/{ujian}/siswa/{siswa}', [ManageJawabanController::class, 'detailSiswa'])->name('manage.jawaban.detail');
+    });
 });
 
 require __DIR__ . '/settings.php';

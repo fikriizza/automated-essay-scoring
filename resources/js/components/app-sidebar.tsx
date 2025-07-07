@@ -222,6 +222,11 @@ export function AppSidebar() {
             href: '/ujian',
             icon: LayoutGrid,
         },
+        {
+            title: 'Jawaban',
+            href: '/manage-jawaban',
+            icon: LayoutGrid,
+        },
     ];
 
     // Menu khusus siswa
