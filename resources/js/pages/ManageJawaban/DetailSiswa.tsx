@@ -3,8 +3,8 @@ import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
-import { Head } from '@inertiajs/react';
-
+import { Head, router } from '@inertiajs/react';
+import { useState } from 'react';
 interface Soal {
     id: string;
     pertanyaan: string;
@@ -34,6 +34,7 @@ interface Siswa {
 interface Jawaban {
     soal_id: string;
     jawaban: string;
+    skor: number | null;
 }
 
 interface Props {
@@ -43,6 +44,32 @@ interface Props {
 }
 
 export default function DetailSiswa({ ujian, siswa, jawabans }: Props) {
+    const [loading, setLoading] = useState(false);
+
+    const handleAutoGrade = async () => {
+        setLoading(true);
+        try {
+            // await router.post(
+            //     `/manage-jawaban/ujian/${ujian.id}/nilai/${siswa.id}`,
+            //     {},
+            //     {
+            //         preserveScroll: true,
+            //         onFinish: () => setLoading(false),
+            //     },
+            // );
+            await router.post(
+                route('manage-jawaban.nilai-otomatis', { ujianId: ujian.id, siswaId: siswa.id }),
+                {},
+                {
+                    preserveScroll: true,
+                    onFinish: () => setLoading(false),
+                },
+            );
+        } catch (error) {
+            console.error('Gagal mengirim ke Groq:', error);
+            setLoading(false);
+        }
+    };
     return (
         <AppLayout>
             <Head title={`Jawaban ${siswa.user.name}`} />
@@ -58,6 +85,15 @@ export default function DetailSiswa({ ujian, siswa, jawabans }: Props) {
                 </div>
 
                 <Separator />
+                <div className="flex justify-end">
+                    <button
+                        onClick={handleAutoGrade}
+                        disabled={loading}
+                        className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+                    >
+                        {loading ? 'Menilai...' : 'Nilai Otomatis'}
+                    </button>
+                </div>
 
                 <div>
                     <CardHeader>
@@ -71,6 +107,7 @@ export default function DetailSiswa({ ujian, siswa, jawabans }: Props) {
                                         <TableHead>No</TableHead>
                                         <TableHead>Pertanyaan</TableHead>
                                         <TableHead>Jawaban</TableHead>
+                                        <TableHead>Skor</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -83,6 +120,13 @@ export default function DetailSiswa({ ujian, siswa, jawabans }: Props) {
                                                 <TableCell>{soal.pertanyaan}</TableCell>
                                                 <TableCell>
                                                     {jawaban ? <span>{jawaban.jawaban}</span> : <Badge variant="destructive">Belum dijawab</Badge>}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {jawaban?.skor != null ? (
+                                                        <Badge variant="secondary">{jawaban.skor} / 100</Badge>
+                                                    ) : (
+                                                        <Badge variant="outline">Belum dinilai</Badge>
+                                                    )}
                                                 </TableCell>
                                             </TableRow>
                                         );

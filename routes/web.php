@@ -76,6 +76,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', [ManageJawabanController::class, 'index'])->name('manage.jawaban.index');
         Route::get('/ujian/{ujian}', [ManageJawabanController::class, 'show'])->name('manage.jawaban.show');
         Route::get('/ujian/{ujian}/siswa/{siswa}', [ManageJawabanController::class, 'detailSiswa'])->name('manage.jawaban.detail');
+        Route::post('/manage-jawaban/{ujianId}/siswa/{siswaId}/nilai-otomatis', [ManageJawabanController::class, 'nilaiOtomatis'])->name('manage-jawaban.nilai-otomatis');
     });
 });
 
