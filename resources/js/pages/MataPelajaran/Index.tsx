@@ -239,11 +239,11 @@ export default function Index() {
                                                       <TableCell className="font-medium">{mata_pelajaran.nama_mapel}</TableCell>
                                                       <TableCell className="text-center">
                                                           <div className="flex justify-center gap-2">
-                                                              <Link href={`/mata_pelajaran/${mata_pelajaran.id}/edit`}>
+                                                              {/* <Link href={`/mata_pelajaran/${mata_pelajaran.id}/edit`}>
                                                                   <Button variant="update" size="sm">
                                                                       Edit
                                                                   </Button>
-                                                              </Link>
+                                                              </Link> */}
                                                               <AlertDialogDelete
                                                                   title="Are you sure?"
                                                                   description={`This will permanently delete the mata_pelajaran "${mata_pelajaran.nama_mapel}".`}
