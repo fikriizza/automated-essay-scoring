@@ -84,7 +84,7 @@ export default function Edit({ siswa }: EditProps) {
                                         id="nama"
                                         value={data.nama}
                                         onChange={(e) => setData('nama', e.target.value)}
-                                        placeholder="Contoh: Budi Santoso"
+                                        placeholder="Contoh: Kelas 1"
                                         className={errors.nama ? 'border-red-500 focus-visible:ring-red-500' : ''}
                                     />
                                     {errors.nama && <p className="text-xs text-red-500">{errors.nama}</p>}

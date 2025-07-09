@@ -70,6 +70,12 @@ export default function DetailSiswa({ ujian, siswa, jawabans }: Props) {
             setLoading(false);
         }
     };
+    const skorList = Object.values(jawabans)
+        .map((j) => j.skor)
+        .filter((skor): skor is number => skor !== null);
+
+    const rataRataNilai = skorList.length > 0 ? (skorList.reduce((a, b) => a + b, 0) / skorList.length).toFixed(2) : null;
+
     return (
         <AppLayout>
             <Head title={`Jawaban ${siswa.user.name}`} />
@@ -93,6 +99,13 @@ export default function DetailSiswa({ ujian, siswa, jawabans }: Props) {
                     >
                         {loading ? 'Menilai...' : 'Nilai Otomatis'}
                     </button>
+                    {rataRataNilai ? (
+                        <div className="text-right text-sm font-medium text-green-600">
+                            Nilai Akhir: <span className="text-xl font-bold">{rataRataNilai}</span>
+                        </div>
+                    ) : (
+                        <div className="text-right text-sm font-medium text-red-500">Semua skor belum tersedia. Nilai belum bisa dihitung.</div>
+                    )}
                 </div>
 
                 <div>
@@ -108,6 +121,7 @@ export default function DetailSiswa({ ujian, siswa, jawabans }: Props) {
                                         <TableHead>Pertanyaan</TableHead>
                                         <TableHead>Jawaban</TableHead>
                                         <TableHead>Skor</TableHead>
+                                        <TableHead>Nilai</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -128,6 +142,7 @@ export default function DetailSiswa({ ujian, siswa, jawabans }: Props) {
                                                         <Badge variant="outline">Belum dinilai</Badge>
                                                     )}
                                                 </TableCell>
+                                                <TableCell>{jawaban?.skor != null ? <span>{jawaban.skor.toFixed(2)}</span> : '-'}</TableCell>
                                             </TableRow>
                                         );
                                     })}

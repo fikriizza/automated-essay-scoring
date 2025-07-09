@@ -30,8 +30,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/create', [KelasController::class, 'create'])->name('create');
         Route::post('/store', [KelasController::class, 'store'])->name('store');
         Route::delete('/{id}', [KelasController::class, 'destroy'])->name('destroy');
-        Route::get('/{id}/edit', [KelasController::class, 'edit'])->name('edit');
-        Route::post('/{id}', [KelasController::class, 'update'])->name('update');
+        // Route::get('/{id}/edit', [KelasController::class, 'edit'])->name('edit');
+        // Route::post('/{id}', [KelasController::class, 'update'])->name('update');
         Route::get('/{kelas}/detail', [KelasController::class, 'show'])->name('detail');
         Route::post('/{kelas}/assign-siswa', [KelasController::class, 'assignSiswa'])->name('assign-siswa');
     });

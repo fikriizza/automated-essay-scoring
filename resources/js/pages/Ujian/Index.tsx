@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
-import { ChevronLeft, ChevronRight, Edit, Eye, Plus, Search, Terminal, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, Eye, Plus, Search, Terminal, Trash2 } from 'lucide-react';
 
 interface UjianItem {
     id: string;
@@ -50,6 +50,8 @@ interface PageProps {
     filters: {
         search?: string;
         per_page?: number;
+        sort_by?: string;
+        sort_direction?: 'asc' | 'desc';
     };
 }
 
@@ -74,13 +76,62 @@ export default function Index() {
     }, [filters]);
 
     const handleSearch = () => {
-        router.get(route('ujian.index'), { search: searchTerm, per_page: perPage }, { preserveState: true, replace: true });
+        router.get(
+            route('ujian.index'),
+            {
+                search: searchTerm,
+                per_page: perPage,
+                sort_by: filters.sort_by,
+                sort_direction: filters.sort_direction,
+            },
+            { preserveState: true, replace: true },
+        );
     };
 
     const handlePerPageChange = (value: string) => {
         const newPerPage = parseInt(value);
         setPerPage(newPerPage);
-        router.get(route('ujian.index'), { search: searchTerm, per_page: newPerPage }, { preserveState: true, replace: true });
+        router.get(
+            route('ujian.index'),
+            {
+                search: searchTerm,
+                per_page: newPerPage,
+                sort_by: filters.sort_by,
+                sort_direction: filters.sort_direction,
+            },
+            { preserveState: true, replace: true },
+        );
+    };
+
+    const handleSort = (column: string) => {
+        let direction: 'asc' | 'desc' = 'asc';
+
+        if (filters.sort_by === column) {
+            direction = filters.sort_direction === 'asc' ? 'desc' : 'asc';
+        }
+
+        router.get(
+            route('ujian.index'),
+            {
+                search: searchTerm,
+                per_page: perPage,
+                sort_by: column,
+                sort_direction: direction,
+            },
+            { preserveState: true, replace: true },
+        );
+    };
+
+    const getSortIcon = (column: string) => {
+        if (filters.sort_by !== column) {
+            return <ArrowUpDown className="ml-1 h-4 w-4 text-gray-400" />;
+        }
+
+        return filters.sort_direction === 'asc' ? (
+            <ArrowUp className="ml-1 h-4 w-4 text-blue-600" />
+        ) : (
+            <ArrowDown className="ml-1 h-4 w-4 text-blue-600" />
+        );
     };
 
     const handlePageChange = (url: string) => {
@@ -92,6 +143,17 @@ export default function Index() {
             router.delete(route('ujian.destroy', id));
         }
     };
+
+    const SortableTableHead = ({ column, children, className = '' }: { column: string; children: React.ReactNode; className?: string }) => (
+        <TableHead className={className}>
+            <Button variant="ghost" className="h-auto p-0 font-medium hover:bg-transparent" onClick={() => handleSort(column)}>
+                <div className="flex items-center">
+                    {children}
+                    {getSortIcon(column)}
+                </div>
+            </Button>
+        </TableHead>
+    );
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -109,7 +171,7 @@ export default function Index() {
                     </Link>
                 </div>
 
-                <div className="bg-muted/30 flex items-center gap-4 rounded-lg p-4">
+                <div className="bg-muted/30 flex flex-wrap items-center gap-4 rounded-lg p-4">
                     <div className="flex flex-1 gap-2">
                         <div className="relative max-w-sm flex-1">
                             <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
@@ -118,6 +180,7 @@ export default function Index() {
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="pl-10"
+                                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                             />
                         </div>
                         <Button onClick={handleSearch} disabled={isLoading}>
@@ -176,10 +239,13 @@ export default function Index() {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>#</TableHead>
-                                    <TableHead>Nama Ujian</TableHead>
-                                    <TableHead>Kelas</TableHead>
-                                    <TableHead>Mata Pelajaran</TableHead>
-                                    <TableHead className="text-center">Jumlah Soal</TableHead>
+                                    <SortableTableHead column="nama_ujian">Nama Ujian</SortableTableHead>
+                                    <SortableTableHead column="kelas.nama_kelas">Kelas</SortableTableHead>
+                                    <SortableTableHead column="kelas.tahun_ajaran">Tahun Ajaran</SortableTableHead>
+                                    <SortableTableHead column="mata_pelajaran.nama_mapel">Mata Pelajaran</SortableTableHead>
+                                    <SortableTableHead column="soals_count" className="text-center">
+                                        Jumlah Soal
+                                    </SortableTableHead>
                                     <TableHead className="text-center">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -194,7 +260,10 @@ export default function Index() {
                                                   <Skeleton className="h-5 w-32" />
                                               </TableCell>
                                               <TableCell>
-                                                  <Skeleton className="h-5 w-24" />
+                                                  <Skeleton className="h-5 w-28" />
+                                              </TableCell>
+                                              <TableCell>
+                                                  <Skeleton className="h-5 w-20" />
                                               </TableCell>
                                               <TableCell>
                                                   <Skeleton className="h-5 w-28" />
@@ -211,10 +280,9 @@ export default function Index() {
                                           <TableRow key={ujian.id}>
                                               <TableCell>{(ujians.current_page - 1) * ujians.per_page + i + 1}</TableCell>
                                               <TableCell className="font-medium">{ujian.nama_ujian}</TableCell>
-                                              {/* <TableCell>{ujian.kelas.nama_kelas}</TableCell> */}
-                                              <TableCell>{ujian.kelas ? `${ujian.kelas.nama_kelas} - ${ujian.kelas.tahun_ajaran}` : '-'}</TableCell>
-
-                                              <TableCell>{ujian.mata_pelajaran.nama_mapel}</TableCell>
+                                              <TableCell>{ujian.kelas ? ujian.kelas.nama_kelas : '-'}</TableCell>
+                                              <TableCell>{ujian.kelas ? ujian.kelas.tahun_ajaran : '-'}</TableCell>
+                                              <TableCell>{ujian.mata_pelajaran?.nama_mapel}</TableCell>
                                               <TableCell className="text-center">
                                                   <Badge variant="secondary">{ujian.soals_count || 0} soal</Badge>
                                               </TableCell>
@@ -224,12 +292,6 @@ export default function Index() {
                                                           <Button variant="default" size="sm">
                                                               <Eye className="mr-1 h-3 w-3" />
                                                               Kelola Soal
-                                                          </Button>
-                                                      </Link>
-                                                      <Link href={route('ujian.edit', ujian.id)}>
-                                                          <Button variant="outline" size="sm">
-                                                              <Edit className="mr-1 h-3 w-3" />
-                                                              Edit
                                                           </Button>
                                                       </Link>
                                                       <Button variant="destructive" size="sm" onClick={() => handleDelete(ujian.id)}>
@@ -243,7 +305,6 @@ export default function Index() {
                             </TableBody>
                         </Table>
 
-                        {/* Pagination */}
                         {ujians.last_page > 1 && (
                             <div className="flex items-center justify-between">
                                 <div className="text-muted-foreground text-sm">

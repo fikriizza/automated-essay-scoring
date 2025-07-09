@@ -56,6 +56,41 @@ class UjianController extends Controller
     //         ],
     //     ]);
     // }
+    // public function index(Request $request)
+    // {
+    //     $perPage = (int) $request->input('per_page', 10);
+    //     $search = $request->input('search');
+    //     $sortBy = $request->input('sort_by', 'nama_ujian');
+    //     $sortDirection = $request->input('sort_direction', 'asc');
+
+    //     // $query = Ujian::with(['kelas', 'mataPelajaran']);
+    //     $query = Ujian::with(['kelas', 'mataPelajaran'])->withCount('soals');
+
+
+    //     if ($search) {
+    //         $query->where('nama_ujian', 'like', "%{$search}%")
+    //             ->orWhereHas('kelas', fn($q) => $q->where('nama_kelas', 'like', "%{$search}%"))
+    //             ->orWhereHas('mataPelajaran', fn($q) => $q->where('nama_mapel', 'like', "%{$search}%"));
+    //     }
+
+    //     if (in_array($sortBy, ['nama_ujian']) && in_array($sortDirection, ['asc', 'desc'])) {
+    //         $query->orderBy($sortBy, $sortDirection);
+    //     } else {
+    //         $query->latest();
+    //     }
+
+    //     $ujians = $query->paginate($perPage)->withQueryString();
+
+    //     return Inertia::render('Ujian/Index', [
+    //         'ujians' => $ujians,
+    //         'filters' => [
+    //             'search' => $search,
+    //             'per_page' => $perPage,
+    //             'sort_by' => $sortBy,
+    //             'sort_direction' => $sortDirection,
+    //         ],
+    //     ]);
+    // }
     public function index(Request $request)
     {
         $perPage = (int) $request->input('per_page', 10);
@@ -63,9 +98,7 @@ class UjianController extends Controller
         $sortBy = $request->input('sort_by', 'nama_ujian');
         $sortDirection = $request->input('sort_direction', 'asc');
 
-        // $query = Ujian::with(['kelas', 'mataPelajaran']);
         $query = Ujian::with(['kelas', 'mataPelajaran'])->withCount('soals');
-
 
         if ($search) {
             $query->where('nama_ujian', 'like', "%{$search}%")
@@ -73,8 +106,33 @@ class UjianController extends Controller
                 ->orWhereHas('mataPelajaran', fn($q) => $q->where('nama_mapel', 'like', "%{$search}%"));
         }
 
-        if (in_array($sortBy, ['nama_ujian']) && in_array($sortDirection, ['asc', 'desc'])) {
-            $query->orderBy($sortBy, $sortDirection);
+        // Handle sorting
+        if (in_array($sortDirection, ['asc', 'desc'])) {
+            switch ($sortBy) {
+                case 'nama_ujian':
+                    $query->orderBy('nama_ujian', $sortDirection);
+                    break;
+                case 'kelas.nama_kelas':
+                    $query->join('kelas', 'ujian.kelas_id', '=', 'kelas.id')
+                        ->orderBy('kelas.nama_kelas', $sortDirection)
+                        ->select('ujian.*');
+                    break;
+                case 'kelas.tahun_ajaran':
+                    $query->join('kelas', 'ujian.kelas_id', '=', 'kelas.id')
+                        ->orderBy('kelas.tahun_ajaran', $sortDirection)
+                        ->select('ujian.*');
+                    break;
+                case 'mata_pelajaran.nama_mapel':
+                    $query->join('mata_pelajaran', 'ujian.mata_pelajaran_id', '=', 'mata_pelajaran.id')
+                        ->orderBy('mata_pelajaran.nama_mapel', $sortDirection)
+                        ->select('ujian.*');
+                    break;
+                case 'soals_count':
+                    $query->orderBy('soals_count', $sortDirection);
+                    break;
+                default:
+                    $query->latest();
+            }
         } else {
             $query->latest();
         }

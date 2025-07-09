@@ -77,7 +77,7 @@ export default function Create() {
                                         id="nama_kelas"
                                         value={data.nama_kelas}
                                         onChange={(e) => setData('nama_kelas', e.target.value)}
-                                        placeholder="Contoh: Budi Santoso"
+                                        placeholder="Contoh: Kelas 1"
                                         className={errors.nama_kelas ? 'border-red-500 focus-visible:ring-red-500' : ''}
                                     />
                                     {errors.nama_kelas && <p className="text-xs text-red-500">{errors.nama_kelas}</p>}
@@ -91,7 +91,7 @@ export default function Create() {
                                         id="tahun_ajaran"
                                         value={data.tahun_ajaran}
                                         onChange={(e) => setData('tahun_ajaran', e.target.value)}
-                                        placeholder="Contoh: 2020/2021"
+                                        placeholder="Contoh: 2025/2026"
                                         className={errors.tahun_ajaran ? 'border-red-500 focus-visible:ring-red-500' : ''}
                                     />
                                     {errors.tahun_ajaran && <p className="text-xs text-red-500">{errors.tahun_ajaran}</p>}

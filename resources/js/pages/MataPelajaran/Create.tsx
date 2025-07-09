@@ -76,7 +76,7 @@ export default function Create() {
                                         id="nama_mapel"
                                         value={data.nama_mapel}
                                         onChange={(e) => setData('nama_mapel', e.target.value)}
-                                        placeholder="Contoh: Budi Santoso"
+                                        placeholder="Contoh: IPA"
                                         className={errors.nama_mapel ? 'border-red-500 focus-visible:ring-red-500' : ''}
                                     />
                                     {errors.nama_mapel && <p className="text-xs text-red-500">{errors.nama_mapel}</p>}

@@ -90,14 +90,18 @@ class KelasController extends Controller
         return to_route('kelas.index')->with('success', 'Kelas berhasil dihapus.');
     }
 
-    public function edit($id)
-    {
-        $kelas = Kelas::findOrFail($id);
-
-        return Inertia::render('Kelas/Edit', [
-            'kelas' => $kelas
-        ]);
-    }
+    // public function edit($id)
+    // {
+    //     $kelas = Kelas::findOrFail($id);
+    //     // $siswa = Siswa::with('user')->findOrFail($id);
+    //     return Inertia::render('Kelas/Edit', [
+    //         'kelas' => [
+    //             'id' => $kelas->id,
+    //             'nama_kelas' => $kelas->nama_kelas,
+    //             'tahun_ajaran' => $kelas->tahun_ajaran,
+    //         ],
+    //     ]);
+    // }
 
     public function update(Request $request, $id)
     {
@@ -120,7 +124,6 @@ class KelasController extends Controller
 
         $currentAcademicYear = $kelas->tahun_ajaran;
 
-        // $allSiswas = Siswa::select('id', 'nama')
         $allSiswas = Siswa::with('user')
             ->whereNotIn('id', function ($query) use ($currentAcademicYear) {
                 $query->select('siswa_id')
@@ -162,7 +165,7 @@ class KelasController extends Controller
             }
 
             $kelas->siswa()->attach($validated['siswa_id'], [
-                'id' => Str::uuid(),
+                // 'id' => Str::uuid(),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

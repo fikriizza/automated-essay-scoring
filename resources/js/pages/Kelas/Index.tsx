@@ -10,9 +10,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { Search, Terminal } from 'lucide-react';
+import { ArrowUpDown, Search, SortAsc, SortDesc, Terminal } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { ArrowUpDown, SortAsc, SortDesc } from 'lucide-react';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Kelas',
@@ -263,29 +262,31 @@ export default function Index() {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead className="w-[40px]">#</TableHead>
-                                    <TableHead
-                                        className="cursor-pointer w-[180px]"
-                                        onClick={() => handleSort('nama_kelas')}
-                                    >
+                                    <TableHead className="w-[180px] cursor-pointer" onClick={() => handleSort('nama_kelas')}>
                                         <div className="flex items-center gap-1">
                                             Nama Kelas
                                             {sortBy === 'nama_kelas' ? (
-                                                sortDirection === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />
+                                                sortDirection === 'asc' ? (
+                                                    <SortAsc className="h-4 w-4" />
+                                                ) : (
+                                                    <SortDesc className="h-4 w-4" />
+                                                )
                                             ) : (
-                                                <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                                                <ArrowUpDown className="text-muted-foreground h-4 w-4" />
                                             )}
                                         </div>
                                     </TableHead>
-                                    <TableHead
-                                        className="cursor-pointer w-[120px]"
-                                        onClick={() => handleSort('tahun_ajaran')}
-                                    >
+                                    <TableHead className="w-[120px] cursor-pointer" onClick={() => handleSort('tahun_ajaran')}>
                                         <div className="flex items-center gap-1">
-
-                                            Tahun Ajaran  {sortBy === 'tahun_ajaran' ? (
-                                                sortDirection === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />
+                                            Tahun Ajaran{' '}
+                                            {sortBy === 'tahun_ajaran' ? (
+                                                sortDirection === 'asc' ? (
+                                                    <SortAsc className="h-4 w-4" />
+                                                ) : (
+                                                    <SortDesc className="h-4 w-4" />
+                                                )
                                             ) : (
-                                                <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                                                <ArrowUpDown className="text-muted-foreground h-4 w-4" />
                                             )}
                                         </div>
                                     </TableHead>
@@ -308,11 +309,6 @@ export default function Index() {
                                                           <Link href={`/kelas/${kelas.id}/detail`}>
                                                               <Button variant="update" size="sm">
                                                                   Detail
-                                                              </Button>
-                                                          </Link>
-                                                          <Link href={`/kelas/${kelas.id}/edit`}>
-                                                              <Button variant="update" size="sm">
-                                                                  Edit
                                                               </Button>
                                                           </Link>
                                                           <AlertDialogDelete
