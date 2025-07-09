@@ -7,7 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Search } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, Search } from 'lucide-react';
 import { useState } from 'react';
 
 interface Ujian {
@@ -44,6 +44,8 @@ interface PageProps {
     filters: {
         search: string;
         per_page: number;
+        sort_by?: string;
+        sort_direction?: 'asc' | 'desc';
     };
 }
 
@@ -54,18 +56,78 @@ export default function Index() {
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        router.get(route('manage.jawaban.index'), { search, per_page: perPage }, { preserveState: true, replace: true });
+        router.get(
+            route('manage.jawaban.index'),
+            {
+                search,
+                per_page: perPage,
+                sort_by: filters.sort_by,
+                sort_direction: filters.sort_direction,
+            },
+            { preserveState: true, replace: true },
+        );
     };
 
     const handlePerPageChange = (value: string) => {
         const newValue = parseInt(value);
         setPerPage(newValue);
-        router.get(route('manage.jawaban.index'), { search, per_page: newValue }, { preserveState: true, replace: true });
+        router.get(
+            route('manage.jawaban.index'),
+            {
+                search,
+                per_page: newValue,
+                sort_by: filters.sort_by,
+                sort_direction: filters.sort_direction,
+            },
+            { preserveState: true, replace: true },
+        );
+    };
+
+    const handleSort = (column: string) => {
+        let direction: 'asc' | 'desc' = 'asc';
+
+        if (filters.sort_by === column) {
+            direction = filters.sort_direction === 'asc' ? 'desc' : 'asc';
+        }
+
+        router.get(
+            route('manage.jawaban.index'),
+            {
+                search,
+                per_page: perPage,
+                sort_by: column,
+                sort_direction: direction,
+            },
+            { preserveState: true, replace: true },
+        );
+    };
+
+    const getSortIcon = (column: string) => {
+        if (filters.sort_by !== column) {
+            return <ArrowUpDown className="ml-1 h-4 w-4 text-gray-400" />;
+        }
+
+        return filters.sort_direction === 'asc' ? (
+            <ArrowUp className="ml-1 h-4 w-4 text-blue-600" />
+        ) : (
+            <ArrowDown className="ml-1 h-4 w-4 text-blue-600" />
+        );
     };
 
     const handlePageChange = (url: string) => {
         router.visit(url, { preserveState: true, replace: true });
     };
+
+    const SortableTableHead = ({ column, children, className = '' }: { column: string; children: React.ReactNode; className?: string }) => (
+        <TableHead className={className}>
+            <Button variant="ghost" className="h-auto p-0 font-medium hover:bg-transparent" onClick={() => handleSort(column)}>
+                <div className="flex items-center">
+                    {children}
+                    {getSortIcon(column)}
+                </div>
+            </Button>
+        </TableHead>
+    );
 
     return (
         <AppLayout>
@@ -79,7 +141,13 @@ export default function Index() {
                     <form onSubmit={handleSearch} className="flex flex-1 items-center gap-2">
                         <div className="relative w-full max-w-sm">
                             <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-                            <Input placeholder="Cari nama ujian..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
+                            <Input
+                                placeholder="Cari nama ujian..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="pl-10"
+                                onKeyPress={(e) => e.key === 'Enter' && handleSearch(e)}
+                            />
                         </div>
                         <Button type="submit">Cari</Button>
                     </form>
@@ -103,7 +171,24 @@ export default function Index() {
                 <Separator />
 
                 {ujians.data.length === 0 ? (
-                    <p className="text-muted-foreground">Tidak ada ujian ditemukan.</p>
+                    <div className="py-8 text-center">
+                        <p className="text-muted-foreground">
+                            {filters.search ? `Tidak ada ujian ditemukan untuk "${filters.search}"` : 'Tidak ada ujian ditemukan.'}
+                        </p>
+                        {filters.search && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="mt-2"
+                                onClick={() => {
+                                    setSearch('');
+                                    router.get(route('manage.jawaban.index'), { per_page: perPage });
+                                }}
+                            >
+                                Clear Search
+                            </Button>
+                        )}
+                    </div>
                 ) : (
                     <div>
                         <CardHeader>
@@ -115,9 +200,10 @@ export default function Index() {
                                     <TableHeader>
                                         <TableRow>
                                             <TableHead>No</TableHead>
-                                            <TableHead>Nama Ujian</TableHead>
-                                            <TableHead>Mata Pelajaran</TableHead>
-                                            <TableHead>Kelas</TableHead>
+                                            <SortableTableHead column="nama_ujian">Nama Ujian</SortableTableHead>
+                                            <SortableTableHead column="mata_pelajaran.nama_mapel">Mata Pelajaran</SortableTableHead>
+                                            <SortableTableHead column="kelas.nama_kelas">Kelas</SortableTableHead>
+                                            <SortableTableHead column="kelas.tahun_ajaran">Tahun Ajaran</SortableTableHead>
                                             <TableHead className="text-center">Aksi</TableHead>
                                         </TableRow>
                                     </TableHeader>
@@ -125,11 +211,10 @@ export default function Index() {
                                         {ujians.data.map((ujian, index) => (
                                             <TableRow key={ujian.id}>
                                                 <TableCell>{(ujians.current_page - 1) * ujians.per_page + index + 1}</TableCell>
-                                                <TableCell>{ujian.nama_ujian}</TableCell>
+                                                <TableCell className="font-medium">{ujian.nama_ujian}</TableCell>
                                                 <TableCell>{ujian.mata_pelajaran?.nama_mapel}</TableCell>
-                                                <TableCell>
-                                                    {ujian.kelas?.nama_kelas} ({ujian.kelas?.tahun_ajaran})
-                                                </TableCell>
+                                                <TableCell>{ujian.kelas?.nama_kelas}</TableCell>
+                                                <TableCell>{ujian.kelas?.tahun_ajaran}</TableCell>
                                                 <TableCell className="text-center">
                                                     <Link href={`/manage-jawaban/ujian/${ujian.id}`}>
                                                         <Button size="sm">Lihat Jawaban</Button>

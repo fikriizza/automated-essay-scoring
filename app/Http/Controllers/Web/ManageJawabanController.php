@@ -25,20 +25,56 @@ class ManageJawabanController extends Controller
     // }
     public function index(Request $request)
     {
-        $query = Ujian::with('kelas', 'mataPelajaran')
-            ->when(
-                $request->search,
-                fn($q) =>
-                $q->where('nama_ujian', 'like', '%' . $request->search . '%')
-            );
+        $perPage = (int) $request->input('per_page', 10);
+        $search = $request->input('search');
+        $sortBy = $request->input('sort_by', 'nama_ujian');
+        $sortDirection = $request->input('sort_direction', 'asc');
 
-        $ujians = $query->paginate($request->per_page ?? 10)->withQueryString();
+        $query = Ujian::with(['kelas', 'mataPelajaran']);
+
+        if ($search) {
+            $query->where('nama_ujian', 'like', "%{$search}%")
+                ->orWhereHas('kelas', fn($q) => $q->where('nama_kelas', 'like', "%{$search}%"))
+                ->orWhereHas('mataPelajaran', fn($q) => $q->where('nama_mapel', 'like', "%{$search}%"));
+        }
+
+        // Handle sorting
+        if (in_array($sortDirection, ['asc', 'desc'])) {
+            switch ($sortBy) {
+                case 'nama_ujian':
+                    $query->orderBy('nama_ujian', $sortDirection);
+                    break;
+                case 'kelas.nama_kelas':
+                    $query->join('kelas', 'ujian.kelas_id', '=', 'kelas.id')
+                        ->orderBy('kelas.nama_kelas', $sortDirection)
+                        ->select('ujian.*');
+                    break;
+                case 'kelas.tahun_ajaran':
+                    $query->join('kelas', 'ujian.kelas_id', '=', 'kelas.id')
+                        ->orderBy('kelas.tahun_ajaran', $sortDirection)
+                        ->select('ujian.*');
+                    break;
+                case 'mata_pelajaran.nama_mapel':
+                    $query->join('mata_pelajaran', 'ujian.mata_pelajaran_id', '=', 'mata_pelajaran.id')
+                        ->orderBy('mata_pelajaran.nama_mapel', $sortDirection)
+                        ->select('ujian.*');
+                    break;
+                default:
+                    $query->latest();
+            }
+        } else {
+            $query->latest();
+        }
+
+        $ujians = $query->paginate($perPage)->withQueryString();
 
         return Inertia::render('ManageJawaban/Index', [
             'ujians' => $ujians,
             'filters' => [
-                'search' => $request->search ?? '',
-                'per_page' => $request->per_page ?? 10,
+                'search' => $search,
+                'per_page' => $perPage,
+                'sort_by' => $sortBy,
+                'sort_direction' => $sortDirection,
             ],
         ]);
     }
