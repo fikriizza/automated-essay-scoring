@@ -1,10 +1,10 @@
 import HeadingSmall from '@/components/heading-small';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { PageProps } from '@inertiajs/core';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { FormEvent } from 'react';
-
 interface Siswa {
     id: number;
     // nama: string;
@@ -76,20 +76,18 @@ export default function KelasDetail() {
                 </p> */}
 
                 <form onSubmit={handleAssign} className="mt-6 flex items-center gap-2">
-                    <select
-                        value={data.siswa_id ?? ''}
-                        onChange={(e) => setData('siswa_id', e.target.value)}
-                        className="rounded border px-3 py-2"
-                        disabled={processing}
-                    >
-                        <option value="">-- Select Siswa --</option>
-                        {allSiswas.filter(Boolean).map((siswa) => (
-                            <option key={siswa.id} value={siswa.id.toString()}>
-                                {/* {siswa.nama} */}
-                                {siswa.user?.name ?? '-'}
-                            </option>
-                        ))}
-                    </select>
+                    <Select value={data.siswa_id ?? ''} onValueChange={(value) => setData('siswa_id', value)} disabled={processing}>
+                        <SelectTrigger className="w-full">
+                            <SelectValue placeholder="-- Select Siswa --" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {allSiswas.filter(Boolean).map((siswa) => (
+                                <SelectItem key={siswa.id} value={siswa.id.toString()}>
+                                    {siswa.user?.name ?? '-'}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
 
                     <button
                         type="submit"
