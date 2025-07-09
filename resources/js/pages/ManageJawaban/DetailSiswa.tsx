@@ -49,14 +49,6 @@ export default function DetailSiswa({ ujian, siswa, jawabans }: Props) {
     const handleAutoGrade = async () => {
         setLoading(true);
         try {
-            // await router.post(
-            //     `/manage-jawaban/ujian/${ujian.id}/nilai/${siswa.id}`,
-            //     {},
-            //     {
-            //         preserveScroll: true,
-            //         onFinish: () => setLoading(false),
-            //     },
-            // );
             await router.post(
                 route('manage-jawaban.nilai-otomatis', { ujianId: ujian.id, siswaId: siswa.id }),
                 {},
@@ -91,23 +83,25 @@ export default function DetailSiswa({ ujian, siswa, jawabans }: Props) {
                 </div>
 
                 <Separator />
-                <div className="flex justify-end">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <button
                         onClick={handleAutoGrade}
                         disabled={loading}
-                        className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+                        className="w-fit rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
                     >
                         {loading ? 'Menilai...' : 'Nilai Otomatis'}
                     </button>
+
                     {rataRataNilai ? (
-                        <div className="text-right text-sm font-medium text-green-600">
-                            Nilai Akhir: <span className="text-xl font-bold">{rataRataNilai}</span>
+                        <div className="text-sm font-semibold text-green-600">
+                            Nilai Akhir: <span className="text-2xl font-bold">{rataRataNilai}</span>
                         </div>
                     ) : (
-                        <div className="text-right text-sm font-medium text-red-500">Semua skor belum tersedia. Nilai belum bisa dihitung.</div>
+                        <div className="w-fit rounded border border-red-300 bg-red-100 px-3 py-2 text-sm text-red-600">
+                            Semua skor belum tersedia. Nilai belum bisa dihitung.
+                        </div>
                     )}
                 </div>
-
                 <div>
                     <CardHeader>
                         <CardTitle>Jawaban Siswa</CardTitle>
@@ -130,19 +124,27 @@ export default function DetailSiswa({ ujian, siswa, jawabans }: Props) {
 
                                         return (
                                             <TableRow key={soal.id}>
-                                                <TableCell>{index + 1}</TableCell>
-                                                <TableCell>{soal.pertanyaan}</TableCell>
-                                                <TableCell>
+                                                <TableCell className="align-top">{index + 1}</TableCell>
+
+                                                <TableCell className="max-w-[400px] align-top break-words whitespace-pre-line">
+                                                    {soal.pertanyaan}
+                                                </TableCell>
+
+                                                <TableCell className="max-w-[400px] align-top break-words whitespace-pre-line">
                                                     {jawaban ? <span>{jawaban.jawaban}</span> : <Badge variant="destructive">Belum dijawab</Badge>}
                                                 </TableCell>
-                                                <TableCell>
+
+                                                <TableCell className="align-top">
                                                     {jawaban?.skor != null ? (
                                                         <Badge variant="secondary">{jawaban.skor} / 100</Badge>
                                                     ) : (
                                                         <Badge variant="outline">Belum dinilai</Badge>
                                                     )}
                                                 </TableCell>
-                                                <TableCell>{jawaban?.skor != null ? <span>{jawaban.skor.toFixed(2)}</span> : '-'}</TableCell>
+
+                                                <TableCell className="align-top">
+                                                    {jawaban?.skor != null ? <span>{jawaban.skor.toFixed(2)}</span> : '-'}
+                                                </TableCell>
                                             </TableRow>
                                         );
                                     })}
