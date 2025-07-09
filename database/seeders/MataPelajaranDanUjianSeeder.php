@@ -21,11 +21,11 @@ class MataPelajaranDanUjianSeeder extends Seeder
 
         foreach ($kelasList as $kelas) {
             // Untuk setiap kelas, buat UTS dan UAS untuk IPA
-            Ujian::create([
-                'nama_ujian' => 'UTS',
-                'kelas_id' => $kelas->id,
-                'mata_pelajaran_id' => $mapelIpa->id,
-            ]);
+            // Ujian::create([
+            //     'nama_ujian' => 'UTS',
+            //     'kelas_id' => $kelas->id,
+            //     'mata_pelajaran_id' => $mapelIpa->id,
+            // ]);
 
             Ujian::create([
                 'nama_ujian' => 'UAS',
@@ -34,11 +34,11 @@ class MataPelajaranDanUjianSeeder extends Seeder
             ]);
 
             // Dan juga UTS dan UAS untuk IPS
-            Ujian::create([
-                'nama_ujian' => 'UTS',
-                'kelas_id' => $kelas->id,
-                'mata_pelajaran_id' => $mapelIps->id,
-            ]);
+            // Ujian::create([
+            //     'nama_ujian' => 'UTS',
+            //     'kelas_id' => $kelas->id,
+            //     'mata_pelajaran_id' => $mapelIps->id,
+            // ]);
 
             Ujian::create([
                 'nama_ujian' => 'UAS',
