@@ -49,37 +49,39 @@ interface PageProps {
     };
     filters: {
         search?: string;
+        tahun_ajaran?: string;
         per_page?: number;
         sort_by?: string;
         sort_direction?: 'asc' | 'desc';
     };
+    tahunAjarans: string[];
 }
 
-const breadcrumbs = [{ title: 'Ujian', href: '/ujian' }];
-
 export default function Index() {
+    const { ujians, flash, filters, tahunAjarans } = usePage().props as PageProps;
+
     const [searchTerm, setSearchTerm] = useState('');
+    const [tahunAjaran, setTahunAjaran] = useState('');
     const [perPage, setPerPage] = useState(10);
-    const { ujians, flash, filters } = usePage().props as PageProps;
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        if (ujians) {
-            const timer = setTimeout(() => setIsLoading(false), 1000);
-            return () => clearTimeout(timer);
-        }
-    }, [ujians]);
-
-    useEffect(() => {
         setSearchTerm(filters.search ?? '');
+        setTahunAjaran(filters.tahun_ajaran ?? '');
         setPerPage(filters.per_page ?? 10);
     }, [filters]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => setIsLoading(false), 500);
+        return () => clearTimeout(timer);
+    }, [ujians]);
 
     const handleSearch = () => {
         router.get(
             route('ujian.index'),
             {
                 search: searchTerm,
+                tahun_ajaran: tahunAjaran,
                 per_page: perPage,
                 sort_by: filters.sort_by,
                 sort_direction: filters.sort_direction,
@@ -88,6 +90,35 @@ export default function Index() {
         );
     };
 
+    // const handleTahunAjaranChange = (value: string) => {
+    //     setTahunAjaran(value);
+    //     router.get(
+    //         route('ujian.index'),
+    //         {
+    //             search: searchTerm,
+    //             tahun_ajaran: value,
+    //             per_page: perPage,
+    //             sort_by: filters.sort_by,
+    //             sort_direction: filters.sort_direction,
+    //         },
+    //         { preserveState: true, replace: true },
+    //     );
+    // };
+    const handleTahunAjaranChange = (value: string) => {
+        const newValue = value === 'all' ? '' : value;
+        setTahunAjaran(newValue);
+        router.get(
+            route('ujian.index'),
+            {
+                search: searchTerm,
+                tahun_ajaran: newValue,
+                per_page: perPage,
+                sort_by: filters.sort_by,
+                sort_direction: filters.sort_direction,
+            },
+            { preserveState: true, replace: true },
+        );
+    };
     const handlePerPageChange = (value: string) => {
         const newPerPage = parseInt(value);
         setPerPage(newPerPage);
@@ -95,6 +126,7 @@ export default function Index() {
             route('ujian.index'),
             {
                 search: searchTerm,
+                tahun_ajaran: tahunAjaran,
                 per_page: newPerPage,
                 sort_by: filters.sort_by,
                 sort_direction: filters.sort_direction,
@@ -105,7 +137,6 @@ export default function Index() {
 
     const handleSort = (column: string) => {
         let direction: 'asc' | 'desc' = 'asc';
-
         if (filters.sort_by === column) {
             direction = filters.sort_direction === 'asc' ? 'desc' : 'asc';
         }
@@ -114,6 +145,7 @@ export default function Index() {
             route('ujian.index'),
             {
                 search: searchTerm,
+                tahun_ajaran: tahunAjaran,
                 per_page: perPage,
                 sort_by: column,
                 sort_direction: direction,
@@ -123,10 +155,7 @@ export default function Index() {
     };
 
     const getSortIcon = (column: string) => {
-        if (filters.sort_by !== column) {
-            return <ArrowUpDown className="ml-1 h-4 w-4 text-gray-400" />;
-        }
-
+        if (filters.sort_by !== column) return <ArrowUpDown className="ml-1 h-4 w-4 text-gray-400" />;
         return filters.sort_direction === 'asc' ? (
             <ArrowUp className="ml-1 h-4 w-4 text-blue-600" />
         ) : (
@@ -156,8 +185,9 @@ export default function Index() {
     );
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AppLayout breadcrumbs={[{ title: 'Ujian', href: '/ujian' }]}>
             <Head title="Ujian" />
+
             <div className="space-y-6 px-4 py-6">
                 <HeadingSmall title="Ujian" description="Kelola ujian berdasarkan kelas dan mata pelajaran" />
 
@@ -176,16 +206,33 @@ export default function Index() {
                         <div className="relative max-w-sm flex-1">
                             <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                             <Input
-                                placeholder="Cari berdasarkan ujian, kelas, atau mapel..."
+                                placeholder="Cari nama ujian, kelas, atau mapel..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="pl-10"
-                                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                             />
                         </div>
                         <Button onClick={handleSearch} disabled={isLoading}>
                             Search
                         </Button>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <span className="text-muted-foreground text-sm">Tahun Ajaran:</span>
+                        <Select value={tahunAjaran} onValueChange={handleTahunAjaranChange}>
+                            <SelectTrigger className="w-[150px]">
+                                <SelectValue placeholder="Pilih tahun" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Semua</SelectItem>
+                                {tahunAjarans.map((ta) => (
+                                    <SelectItem key={ta} value={ta}>
+                                        {ta}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -215,24 +262,7 @@ export default function Index() {
                 )}
 
                 {!isLoading && ujians.data.length === 0 ? (
-                    <div className="py-8 text-center">
-                        <div className="text-muted-foreground text-sm italic">
-                            {filters.search ? `Tidak ada ujian ditemukan untuk "${filters.search}"` : 'Belum ada ujian.'}
-                        </div>
-                        {filters.search && (
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="mt-2"
-                                onClick={() => {
-                                    setSearchTerm('');
-                                    router.get(route('ujian.index'), { per_page: perPage });
-                                }}
-                            >
-                                Clear Search
-                            </Button>
-                        )}
-                    </div>
+                    <div className="text-muted-foreground py-8 text-center text-sm italic">Data tidak ditemukan.</div>
                 ) : (
                     <div className="space-y-4">
                         <Table>
@@ -256,23 +286,8 @@ export default function Index() {
                                               <TableCell>
                                                   <Skeleton className="h-5 w-8" />
                                               </TableCell>
-                                              <TableCell>
-                                                  <Skeleton className="h-5 w-32" />
-                                              </TableCell>
-                                              <TableCell>
-                                                  <Skeleton className="h-5 w-28" />
-                                              </TableCell>
-                                              <TableCell>
-                                                  <Skeleton className="h-5 w-20" />
-                                              </TableCell>
-                                              <TableCell>
-                                                  <Skeleton className="h-5 w-28" />
-                                              </TableCell>
-                                              <TableCell>
-                                                  <Skeleton className="h-5 w-16" />
-                                              </TableCell>
-                                              <TableCell>
-                                                  <Skeleton className="h-9 w-32" />
+                                              <TableCell colSpan={6}>
+                                                  <Skeleton className="h-5 w-full" />
                                               </TableCell>
                                           </TableRow>
                                       ))
@@ -280,9 +295,9 @@ export default function Index() {
                                           <TableRow key={ujian.id}>
                                               <TableCell>{(ujians.current_page - 1) * ujians.per_page + i + 1}</TableCell>
                                               <TableCell className="font-medium">{ujian.nama_ujian}</TableCell>
-                                              <TableCell>{ujian.kelas ? ujian.kelas.nama_kelas : '-'}</TableCell>
-                                              <TableCell>{ujian.kelas ? ujian.kelas.tahun_ajaran : '-'}</TableCell>
-                                              <TableCell>{ujian.mata_pelajaran?.nama_mapel}</TableCell>
+                                              <TableCell>{ujian.kelas?.nama_kelas || '-'}</TableCell>
+                                              <TableCell>{ujian.kelas?.tahun_ajaran || '-'}</TableCell>
+                                              <TableCell>{ujian.mata_pelajaran?.nama_mapel || '-'}</TableCell>
                                               <TableCell className="text-center">
                                                   <Badge variant="secondary">{ujian.soals_count || 0} soal</Badge>
                                               </TableCell>

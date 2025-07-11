@@ -13,7 +13,7 @@ class KelasSeeder extends Seeder
      */
     public function run(): void
     {
-        $tahunAjaranList = ['2024/2025', '2025/2026'];
+        $tahunAjaranList = ['2025/2026'];
 
         foreach ($tahunAjaranList as $tahunAjaran) {
             for ($i = 1; $i <= 6; $i++) {
